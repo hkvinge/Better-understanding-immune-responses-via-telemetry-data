@@ -3,14 +3,24 @@ import numpy as np
 
 import calcom
 
-prefixes = ['/data4/kvinge/time_series_work/tamu/','/Users/HK/Programming/Calcom/tamu/', '/data3/darpa/tamu/']
+#
+prefixes = ['/data4/kvinge/time_series_work/tamu/',
+            '/Users/HK/Programming/Calcom/tamu/', 
+            '/data3/darpa/tamu/',
+            'C:/Users/manuc/Documents/Github/calcom/']
 
+ccd = None
 for p in prefixes:
     try:
         ccd = calcom.io.CCDataSet(p + 'tamu_expts_01-27.h5')
         break
     except:
         continue
+#
+
+if not ccd:
+    # failed to find the dataset
+    raise Exception('COULD NOT LOAD THE DATASET - ADD THE FOLDER CONTAINING tamu_expts_01-27.h5 TO THE LIST OF PREFIXES IN utils.py')
 #
 
 n_mice = len(ccd.data)
