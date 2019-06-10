@@ -12,7 +12,8 @@ prefixes = ['/data4/kvinge/time_series_work/tamu/',
 ccd = None
 for p in prefixes:
     try:
-        ccd = calcom.io.CCDataSet(p + 'tamu_expts_01-27.h5')
+#        ccd = calcom.io.CCDataSet(p + 'tamu_expts_01-27.h5')
+        ccd = calcom.io.CCDataSet(p + 'tamu_expts_01-28.h5')
         break
     except:
         continue
@@ -464,6 +465,21 @@ def generate_partitions(attrvals):
     partitions = [ [np.setdiff1d(all_idx, eq[k]), eq[k]] for k in eq.keys() ]
     
     return partitions
+#
+
+def line2pheno(line):
+    '''
+    Input: string, the line of the mouse
+    Output: expected phenotype; latest classifications by collaborators
+    '''
+    if line in ['C57B6','CC025','CC042','CC013']:
+        return 'sensitive'
+    elif line in ['CC001','CC006','CC011','CC012','CC019','CC043','CC057','CC043','CC015']:
+        return 'tolerant'
+    elif line in ['CC002','CC004','CC041','CC051']:
+        return 'resistant'
+    else:
+        return 'unknown'
 #
 
 if __name__=="__main__":
