@@ -16,11 +16,14 @@ def tde(signal,delay=6*60,nd=3):
     n, = np.shape(signal)   # will throw error if not expected input.
     
     sub_idx = np.arange(n - delay*(nd-1))
+    
     inc = np.tile([k*delay for k in range(nd-1,-1,-1)], (len(sub_idx),1))
     
     inc = (inc.T + sub_idx).T
     
     tde_signal = np.array(signal)[inc]
+    
+    tde_signal = tde_signal.T
     
     return tde_signal
 #

@@ -19,7 +19,8 @@ delay = int((np.pi/2)/(t[1] - t[0]))
 X = tde.tde(x, delay=delay)
 
 # code demands data in X arranged as columns.
-X = X.T
+# note: tde.tde() does this by default now.
+#X = X.T
 
 norms = mset.online_mset(X, output_norms=True, thresh=thresh, verbosity=1)
 

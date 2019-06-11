@@ -168,7 +168,7 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
         *args:
         op: a function implementing the nonlinear similarity between 
             two vectors, which is the basis for most of the 
-            corresponding nonlinear operators X \otimes Y. 
+            corresponding nonlinear operators on matrices X \otimes Y. 
             Default: otimes2_ij, in the mset.py file.
             
         thresh: threshold parameter; if relative error in representing 

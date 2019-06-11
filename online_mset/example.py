@@ -21,7 +21,8 @@ def visualize_mset(x,thresh,delay):
     X = tde.tde(x, delay=delay)
 
     # code demands data in X arranged as columns.
-    X = X.T
+    # note: code updated to give this as the output of tde.tde().
+#    X = X.T
 
     norms = mset.online_mset(X, output_norms=True, thresh=thresh, verbosity=1)
 
