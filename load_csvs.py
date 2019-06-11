@@ -1,7 +1,9 @@
 
 # edit paths as needed
-ts = './tamu_01-28_temps_smooth.csv'
-meta = './tamu_01-28_metadata_clean.csv'
+PREFIX = '/data3/darpa/tamu/'
+
+ts = PREFIX + 'tamu_01-28_temps_smooth.csv'
+meta = PREFIX + 'tamu_01-28_metadata_clean.csv'
 
 def load():
     '''
