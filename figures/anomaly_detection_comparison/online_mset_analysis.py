@@ -1,6 +1,10 @@
 import sys
-sys.path.append('/home/katrina/a/aminian/Better-understanding-immune-responses-via-telemetry-data')
-sys.path.append('/home/katrina/a/aminian/Better-understanding-immune-responses-via-telemetry-data/online_mset')
+
+PREFIX = '/home/katrina/a/aminian/'
+repo = 'Better-understanding-immune-responses-via-telemetry-data/'
+
+sys.path.append(PREFIX + repo)
+sys.path.append(PREFIX + repo + 'online_mset')
 
 import tde
 import mset
