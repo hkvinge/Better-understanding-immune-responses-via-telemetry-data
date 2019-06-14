@@ -47,7 +47,7 @@ cbar = fig.colorbar(cax)
 delcbar = 1440/(t_d.max() -t_d.min())
 
 cbar.set_ticks(0.5 + delcbar*np.arange(-6,6))
-cbar.set_ticklabels(np.arange(-5,6))
+cbar.set_ticklabels(np.arange(-6,6))
 fig.tight_layout()
 ax.set_xlabel(r'$x(t)$', fontsize=14)
 ax.set_ylabel(r'$x(t-\tau)$', fontsize=14)
@@ -57,8 +57,8 @@ fig.tight_layout()
 #fig.show()
 
 
-fig.savefig('embedded_cc004-021-v1.png', dpi=120, bbox_inches='tight')
-fig.savefig('embedded_cc004-021-v1.pdf', dpi=120, bbox_inches='tight')
+fig.savefig('embedded_cc004-021-toi.png', dpi=120, bbox_inches='tight')
+fig.savefig('embedded_cc004-021-toi.pdf', dpi=120, bbox_inches='tight')
 
 #######################################
 
@@ -123,14 +123,14 @@ valigns = ['center','bottom','center','top']
 rots = [0,0,0,0]
 
 for l,anxy,ha,va,rot in zip(labels,annotesxy,haligns,valigns, rots):
-    ax2o.annotate(l,anxy,ha=ha,va=va, fontsize=10, rotation=rot)
+    ax2o.annotate(l,anxy,ha=ha,va=va, fontsize=12, rotation=rot)
 
 
 ##########################################################
 
 #cbar.set_ticks(0.5 + delcbar*np.arange(-6,6))
 #cbar.set_ticklabels(np.arange(-5,6))
-fig2.tight_layout()
+#fig2.tight_layout()
 ax2.set_xlabel(r'$x(t)$', fontsize=14)
 ax2.set_ylabel(r'$x(t-\tau)$', fontsize=14)
 ax2.set_zlabel(r'$x(t-2\tau)$', fontsize=14)
@@ -140,6 +140,6 @@ ax2.set_zlabel(r'$x(t-2\tau)$', fontsize=14)
 #fig2.show()
 
 
-fig2.savefig('embedded_cc004-021-v2.png', dpi=120, bbox_inches='tight')
-fig2.savefig('embedded_cc004-021-v2.pdf', dpi=120, bbox_inches='tight')
+fig2.savefig('embedded_cc004-021-tod.png', dpi=120, bbox_inches='tight')
+fig2.savefig('embedded_cc004-021-tod.pdf', dpi=120, bbox_inches='tight')
 
