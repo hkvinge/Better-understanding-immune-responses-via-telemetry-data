@@ -1,21 +1,26 @@
 '''
 Implements the tools necessary for an "online" 
 implementation of MSET with a vector timeseries.
-Supports nonlinear operators \otimes which take 
-a form based on a nonlinear operator operating 
-amongst all possible pairs of columns of matrices 
-X and Y.
+Supports a subset of `simpler` nonlinear operators 
+$\otimes$ which are based on pairwise operations of 
+all the elements in X and Y.
 
 The basic algorithm is described in the function
 online_MSET().
 
 Manuchehr Aminian
-10 June 2019
+Last update: 20 August 2019
 '''
 
 import numpy as np
 import scipy
 
+#
+# These store the cached similarity matrix 
+# and its LU factors, which speeds up evaluation
+# of new points. Will be faster than "naive"
+# reconstruction when there are only a few anomalies.
+#
 global _D
 global _oDD
 global _oDD_lufactors
@@ -23,6 +28,11 @@ global _oDD_lufactors
 _D = np.zeros((0,0))
 _oDD = np.zeros((0,0))
 _oDD_lufactors = None
+
+
+#
+#########################################################
+#
 
 def otimes1_ij(x,y):
     '''
@@ -49,7 +59,7 @@ def otimes(X,Y, op=otimes2_ij):
     otimes operator on matrices; double loop over the columns of X and Y.
     
     Note slightly different convention than in the papers; there, X loops 
-        over the rows and 
+        over the rows and Y over the columns.
     '''
     m1,n = np.shape(X)
     m2,p = np.shape(Y)
@@ -70,7 +80,7 @@ def otimes(X,Y, op=otimes2_ij):
 #
 
 
-def W_op(D,P, op=otimes2_ij):
+def op_W(D,P, op=otimes2_ij):
     '''
     Nonlinearly maps the features into the (possibly overcomplete)
     columns of D based on the operator otimes; roughly,
@@ -116,8 +126,6 @@ def W_op(D,P, op=otimes2_ij):
         _oDD = oDD
 
         _oDD_lufactors = spla.lu_factor(oDD)
-#    else:
-#        oDD = _oDD
     #
     
     # fix P if it's a one-dimensional array.
@@ -128,8 +136,8 @@ def W_op(D,P, op=otimes2_ij):
     #
     
     oDP = otimes(D,P, op=op)
-    
-#    W = np.linalg.solve( oDD, oDP )
+
+    # The actual operation.    
     try:
         W = spla.lu_solve(_oDD_lufactors, oDP)
     except:
@@ -163,7 +171,8 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
         Y: numpy array, shape (d,n); n vectors in dimension d.
     Outputs:
         anomalies: numpy array, shape (n,); True/False 
-            vector indicating updates to the memory/dictionary/exemplars.
+            vector indicating locations of anomalies; i.e., 
+            updates to the memory/dictionary/exemplars.
     Optional inputs:
         *args:
         op: a function implementing the nonlinear similarity between 
@@ -178,7 +187,8 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
             
         output_norms: Boolean. If True, then the values of the 
             relative error are output instead of the binary vector 
-            of thresholds. 
+            of thresholds. Computing (anomalies < thresh) returns the 
+            original output.
             Default: False.
             
         **kwargs:
