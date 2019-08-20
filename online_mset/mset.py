@@ -95,7 +95,7 @@ def op_W(D,P, op=otimes2_ij):
     A rough caching is done if mset.py is treated 
     as a module to accelerate repeated calls to this function; 
     the matrix D and the similarity matrix otimes(D,D)
-    are stored internally, and W_op uses the stored otimes(D,D) 
+    are stored internally, and op_W uses the stored otimes(D,D) 
     if D is the same as the internally stored _D.
     '''
     import numpy as np
@@ -224,7 +224,7 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
         ycurr = Y[:,j]
         ycurr.shape = (d,1)
         
-        w = W_op( D, ycurr )
+        w = op_W( D, ycurr )
         
         ytil = np.dot(D, w)
         
