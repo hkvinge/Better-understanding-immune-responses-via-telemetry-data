@@ -25,10 +25,16 @@ global _D
 global _oDD
 global _oDD_lufactors
 
+global _mu
+global _mus
+
+
 _D = np.zeros((0,0))
 _oDD = np.zeros((0,0))
 _oDD_lufactors = None
 
+_mu = np.nan
+_mus = []
 
 #
 #########################################################
@@ -51,7 +57,12 @@ def otimes2_ij(x,y):
     s(x,y) = 1 - ||x-y||/(||x|| + ||y||)
     '''
     import numpy as np
-    return 1. - np.linalg.norm(x-y)/(np.linalg.norm(x) + np.linalg.norm(y))
+    
+    # Using haar wavelets, need to handle exact identity.
+    if all(x==y):
+        return 1.
+    else:
+        return 1. - np.linalg.norm(x-y)/(np.linalg.norm(x) + np.linalg.norm(y))
 #
 
 def otimes(X,Y, op=otimes2_ij):
@@ -142,7 +153,7 @@ def op_W(D,P, op=otimes2_ij):
         W = spla.lu_solve(_oDD_lufactors, oDP)
     except:
         print('LU solver failed; falling back naive solver.')
-        W = np.linalg.solve( oDD, oDP )
+        W = np.linalg.solve( _oDD, oDP )
     #
     return W
 #
@@ -205,6 +216,8 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
     verbosity = kwargs.get('verbosity',0)
     
     global _oDD
+    global _mu
+    global _mus
     
     d,n = np.shape(Y)
     
@@ -212,17 +225,32 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
     norms = np.zeros(n, dtype=float)
     
     # one-off; manually edit _oDD.
+
+    # in mean-centering approach, mean-normalization will
+    # correspond to 
+    
+    _mu = np.array( Y[:,0] )
+    _mu.shape = (d,1)
+    _mus = [ _mu ]
+    
     D = np.zeros( (d,1), dtype=float)
-    D[:,0] = Y[:,0]
+    y1 = Y[:,1]
+    y1.shape = (d,1)
+#    D[:,0] = y1 - _mu
+    D = y1 - _mu
+    norms[0] = 0.
     _oDD = otimes(D,D, op=op)
     
-    norms[0] = 0.
     
-    for j in range(1,n):
+    for j in range(2,n):
         if verbosity>0: print('Iteration %s : '%str(j).zfill(5), end='')
         
-        ycurr = Y[:,j]
+        yorig = np.array( Y[:,j] )
+        yorig.shape = (d,1)
+        
+        ycurr = np.array( Y[:,j] )
         ycurr.shape = (d,1)
+        ycurr -= _mu
         
         w = op_W( D, ycurr )
         
@@ -239,6 +267,12 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
         else:
             if verbosity>0: print('appending datapoint to memory.')
             D = np.hstack( (D, ycurr) )
+            
+            # update the mean
+            nc = len( _mus ) +1
+            _mu = ((nc-1.)*_mu + yorig)/(nc)
+            _mus.append( _mu )
+            
         #
     #
     
