@@ -12,12 +12,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import utils
 import scipy
-import pywt
+
+try:
+    import pywt
+except:
+    raise Exception('PyWavelets required -- pip install PyWavelets or similar.')
+#
+if not hasattr(pywt,'dwt'):
+    raise Exception("The pywt (PyWavelets) package requires dwt. Make sure you've installed the correct version.")
+#
 
 # Compression gives the degree of detail coefficients
 # we save when applying wavelet smoothing. The larger
 # this integer, the more smoothing is done
-compression = 4
+compression = 6
 
 # Use Calcom to load time series
 
@@ -32,14 +40,16 @@ ccd = utils.ccd
 ts = []
 
 # Convert time series into a list of numpy arrays
-kept_idx = []
+#kept_idx = []
+upper_limit = 10000 + 7*60*24
+
 for count,i in enumerate(ccd.data):
-    a = utils.process_timeseries(i, nan_thresh=60*4)
+    a = utils.process_timeseries(i[:,:upper_limit], nan_thresh=60*4)
     if len(a) > 0:
         a = np.array(a)
         # Use only the temperature values
         ts.append(a[0,:])
-        kept_idx.append( count )
+#        kept_idx.append( count )
 #
         
 # We will calculate two types of smoothings. One type stored in
@@ -73,11 +83,11 @@ for count, a in enumerate(ts):
 if __name__=="__main__":
     # Plot some samples to see what they look like
     sample_temperatures = ts[0]
-    plt.plot(np.transpose(sample_temperatures))
+#    plt.plot(np.transpose(sample_temperatures))
     sample_temp_smooth = ts_smooth[0]
-    plt.plot(np.transpose(sample_temp_smooth))
-    plt.show()
+#    plt.plot(np.transpose(sample_temp_smooth))
+#    plt.show()
     sample_temp_smooth_shrunk = ts_smooth_shrunk[0]
-    plt.plot(np.transpose(sample_temp_smooth_shrunk))
-    plt.show()
+#    plt.plot(np.transpose(sample_temp_smooth_shrunk))
+#    plt.show()
 #
