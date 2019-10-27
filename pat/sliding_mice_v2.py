@@ -109,10 +109,10 @@ for i, idx in enumerate(graph_idx):
             ax[0][i].scatter(evecs[idx,j,1], evecs[idx,j,2], s = 12, color = 'red')
             # one-off tweak blah
             if i!=2:
-                ax[0][i].annotate(text, (evecs[idx,j,1], evecs[idx,j,2]), weight = 'bold')
+                ax[0][i].annotate(text, (evecs[idx,j,1], evecs[idx,j,2]), weight = 'bold', fontsize=13)
             else:
                 width = np.diff( ax[0][0].get_xlim() )[0]
-                ax[0][i].annotate(text, (evecs[idx,j,1], evecs[idx,j,2]), weight = 'bold', xytext=(evecs[idx,j,1]-0.15*width,evecs[idx,j,2]), textcoords='data')
+                ax[0][i].annotate(text, (evecs[idx,j,1], evecs[idx,j,2]), weight = 'bold', xytext=(evecs[idx,j,1]-0.20*width,evecs[idx,j,2]), textcoords='data', fontsize=13)
         else:
             ax[0][i].scatter(evecs[idx,j,1], evecs[idx,j,2], s = 10, color = 'lightblue', alpha = 0.2)
 
@@ -138,9 +138,11 @@ for j, idx in enumerate(mouses):
 #plt.show()
 #
 
-ax[1][0].set_xticklabels(np.arange(-3,4), fontsize=14)
 ax[1][0].set_yticks(np.arange(34,39,2))
-ax[1][0].set_yticklabels(np.arange(34,39,2), fontsize=14)
+ax[1][-1].set_xticklabels(np.arange(-3,4), fontsize=14)
+for j in range(7):
+    ax[1][j].set_yticklabels(np.arange(34,39,2), fontsize=14)
+#
 
 # more labeling!!!!!!
 ax[1][-1].set_xlabel('Time (days)', fontsize=16)
