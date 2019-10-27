@@ -60,7 +60,7 @@ evecs = sliding_eigenvecs
 
 
 fig = plt.figure(constrained_layout=False, figsize=(16,8))
-gs = fig.add_gridspec(1, 2, wspace=0.1, hspace=0.0, width_ratios=[0.3,0.7])
+gs = fig.add_gridspec(1, 2, wspace=0.15, hspace=0.0, width_ratios=[0.3,0.7])
 gss = []
 gss.append( gs[0].subgridspec(3,1, wspace=0.0, hspace=0.05) )
 gss.append( gs[1].subgridspec(7,1, wspace=0.0, hspace=0.05) )
@@ -138,8 +138,9 @@ for j, idx in enumerate(mouses):
 #plt.show()
 #
 
-ax[1][0].set_xticklabels(np.arange(-3,4))
+ax[1][0].set_xticklabels(np.arange(-3,4), fontsize=14)
 ax[1][0].set_yticks(np.arange(34,39,2))
+ax[1][0].set_yticklabels(np.arange(34,39,2), fontsize=14)
 
 # more labeling!!!!!!
 ax[1][-1].set_xlabel('Time (days)', fontsize=16)
