@@ -152,7 +152,7 @@ for j,color,interval in zip(range(3), ['g','y','r'], [r'$[-3,-2]$', r'$[0,1]$', 
 #    ax[0][j].set_xlim([xint[0], xint[0] + 1.2*np.diff(xint)])
     ax[0][j].set_ylim([yint[0], yint[0] + 1.2*np.diff(yint)])
     
-    ax[0][j].text(0.95,0.95, 'Embedding time: '+interval, fontsize=16, ha='right', va='top', transform=ax[0][j].transAxes, bbox=dict(facecolor=color, alpha=0.1))
+    ax[0][j].text(0.95,0.95, 'Embedded interval: '+interval, fontsize=16, ha='right', va='top', transform=ax[0][j].transAxes, bbox=dict(facecolor=color, alpha=0.1))
 #
 
 ax[1][3].set_ylabel(r'Temperature ($^{\circ}$C)', fontsize=16)
