@@ -18,8 +18,10 @@ from scipy.spatial.distance import euclidean
 from sklearn.cluster import KMeans
 
 # Use Calcom to load time series
-path = '/data4/kvinge/time_series_work/tamu/'
-ccd = calcom.io.CCDataSet(path + 'tamu_expts_01-27.h5')
+#path = '/data4/kvinge/time_series_work/tamu/'
+#ccd = calcom.io.CCDataSet(path + 'tamu_expts_01-27.h5')
+
+ccd = utils.ccd
 
 # Time duration for clustering
 days = 5
