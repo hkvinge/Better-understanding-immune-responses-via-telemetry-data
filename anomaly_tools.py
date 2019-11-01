@@ -101,4 +101,39 @@ def full_blown_disease(anomalies,**kwargs):
     return loc
 #
 
+def mset_feature_vector(anoms, gap_thresh, infection_time=10000, skip_len=64, delay=2*360):
+    '''
+    Generates a feature vector from a collection of anomalies.
+    It's assumed the anomalies come from the embedded, then subsampled, 
+    time series, so parameters here are needed to compare back to infection time.
+    
+    Defunct - moved on to other considerations rather than attempting clustering 
+    based on features generated from MSET. Not enough shape is revealed here.
+    '''
+    if isinstance(gap_thresh, list) or isinstance(gap_thresh, np.ndarray):
+        # apply for each value, then concatenate.
+        thing = []
+        for g in gap_thresh:
+            thing.append( mset_feature_vector(anoms, g, infection_time=infection_time, skip_len=skip_len, delay=delay) )
+        #
+        return np.concatenate(thing)
+    else:
+    
+        uhohs = np.where(anoms)[0]
+        duhohs = np.diff(uhohs)
+        
+        # get the "significant" anomalies - ones appearing after a gap between updates.
+        flagged = uhohs[ np.where(duhohs>gap_thresh)[0] + 1 ]
+        
+        # translate to time relative to inoculation.
+        flagged_transformed = delay + skip_len*flagged - infection_time
 
+        flagged_before = np.where(flagged_transformed < 0.)[0]
+        flagged_after = np.where(flagged_transformed >= 0.)[0]
+        
+        if len(flagged_before)==0: print('no anomalies flagged before!')
+        if len(flagged_after)==0: print('no anomalies flagged after!')
+        
+        return np.array([ len(flagged_before), len(flagged_after), min(flagged_transformed), max(flagged_transformed) ])
+    #
+#
