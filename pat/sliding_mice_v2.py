@@ -157,5 +157,6 @@ for j,color,interval in zip(range(3), ['g','y','r'], [r'$[-3,-2]$', r'$[0,1]$', 
 
 ax[1][3].set_ylabel(r'Temperature ($^{\circ}$C)', fontsize=16)
 
-fig.show()
-fig.savefig('lap_eig_combo_vis_generator.png', dpi=120, bbox_inches='tight')
+#fig.show()
+fig.savefig('lap_eig_combo_vis_generator_v2.png', dpi=120, bbox_inches='tight')
+fig.savefig('lap_eig_combo_vis_generator_v2.pdf', dpi=120, bbox_inches='tight')

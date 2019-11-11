@@ -140,6 +140,26 @@ class MyMice():
         self.lines = self.ccd.get_attrs('line')
         self.id_list = self.ccd.get_attrs('_id')
         self.mouse_id_list = self.ccd.get_attrs('mouse_id')
+        
+        # tweak - replace "C57B6" with "C57BL/6J"
+        new_mouse_id_list = []
+        import re
+        
+        pattern = 'C57B6([a-zA-Z0-9\-]{1,})'
+        prefix = "C57BL/6J"
+        for j,mouse_name in enumerate(self.mouse_id_list):
+            hit = re.match(pattern, mouse_name)
+            if hit: # did we hit?
+                suffix = hit.groups(1)[0]
+                # replace
+                print('OLD: %s => NEW: %s'%(mouse_name, prefix+suffix))
+                new_mouse_id_list.append( prefix+suffix )
+            else:
+                new_mouse_id_list.append( mouse_name )
+        #
+        self.mouse_id_list = np.array(new_mouse_id_list)
+        
+        #
         self.temp_data = self.ccd.data[0:self.mice_count][0]
 
 
