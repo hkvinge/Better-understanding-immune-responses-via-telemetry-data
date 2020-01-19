@@ -58,8 +58,8 @@ def otimes2_ij(x,y):
     '''
     import numpy as np
     
-    # Using haar wavelets, need to handle exact identity.
     if all(x==y):
+        # Handling the case of x and y both being the zero vector.
         return 1.
     else:
         return 1. - np.linalg.norm(x-y)/(np.linalg.norm(x) + np.linalg.norm(y))
@@ -165,14 +165,21 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
     timeseries Y, arranged by **columns**.
     
     The algorithm goes as follows:
-        1. Initialize the memory/dictionary/list of exemplars
-           "D" with the first column of Y.
+        1. Initialization.
+            a. Initialize the estimate for the data mean with the 
+                first column of Y.
+            b. Initialize the memory/dictionary/list of exemplars
+                "D" with the second column of Y, subtracting the running average.
         2. For the remaining columns of Y, indexed by j,
-            a. Apply the nonlinear mapping of the data onto 
-                the basis of D and calculate the prediction Dy. 
-            b. If ||Dy - Y[:,j]||/||Y[:,j]|| < thresh,
-                continue; else, append Y[:,j] to D and 
-                mark index j as an anomaly.
+            a. Subtract the estimate for the mean from Y[:,j], call it y.
+            b. Apply the nonlinear mapping of the data onto 
+                the basis of D and calculate the prediction, call it yhat.
+            c. If ||yhat - y||/||y|| < thresh,
+                continue; else, append Y[:,j] to D, 
+                mark index j as an anomaly, and update the 
+                estimate of the mean with a weighted average of the 
+                existing mean and the new data point (should be a simple mean
+                of all anomalies to that point).
 
         3. The output is a binary vector of the same size 
             as np.shape(Y)[1] indicating locations where 
@@ -215,33 +222,30 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
     #
     verbosity = kwargs.get('verbosity',0)
     
-    global _oDD
-    global _mu
-    global _mus
+    global _oDD     # storage for precomputed operator (D \otimes D)
+    global _mu      # current estimate for mean
+    global _mus     # the history of calculated means; non-essential.
     
     d,n = np.shape(Y)
     
     #anomalies = np.array(n, dtype=bool)
     norms = np.zeros(n, dtype=float)
     
-    # one-off; manually edit _oDD.
-
-    # in mean-centering approach, mean-normalization will
-    # correspond to 
-    
+    # track an estimate for the data mean, initialized with the 
+    # first data point in Y.
     _mu = np.array( Y[:,0] )
     _mu.shape = (d,1)
     _mus = [ _mu ]
     
+    # The second vector in Y will be the first dictionary entry.
     D = np.zeros( (d,1), dtype=float)
     y1 = Y[:,1]
     y1.shape = (d,1)
-#    D[:,0] = y1 - _mu
     D = y1 - _mu
     norms[0] = 0.
     _oDD = otimes(D,D, op=op)
     
-    
+    # main loop. 
     for j in range(2,n):
         if verbosity>0: print('Iteration %s : '%str(j).zfill(5), end='')
         
@@ -268,7 +272,7 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
             if verbosity>0: print('appending datapoint to memory.')
             D = np.hstack( (D, ycurr) )
             
-            # update the mean
+            # update the mean; store a history of previous values.
             nc = len( _mus ) +1
             _mu = ((nc-1.)*_mu + yorig)/(nc)
             _mus.append( _mu )
@@ -277,8 +281,10 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
     #
     
     if output_norms:
+        # allow the user to play with thresholding
         return norms
     else:
+        # apply a thresholding to define anomalies.
         return (norms >= thresh)
     #
 #
@@ -288,33 +294,25 @@ def online_mset(Y, op=otimes2_ij, thresh=0.10, output_norms=False, **kwargs):
 # whole gamut + visualization
 #
 
-def visualize_mset(x,thresh,delay):
+def visualize_mset(x,thresh,delay, verbosity=0):
+    '''
+    Applies the online MSET algorithm to a scalar time series x 
+    (expected as a simple row vector/array) and specified 
+    threshold and time delay parameters. (the embedded space 
+    is always three dimensional here).
+    '''
     import tde
     import numpy as np
     from matplotlib import pyplot
 
-#    n = 4000
-#    thresh = 0.1
-
-#    t = np.linspace(0, 10*np.pi, n)
-#    x = np.sin(t) + 0.1*np.random.randn(n)
-
-    # introduce a new type of signal halfway through.
-#    heavy = (1 + np.tanh( 0.5*(t-5*np.pi) ))/2.
-#    x += heavy*np.sin(t/2) + heavy*(-np.sin(t))
-
-    # time delayed embedding based on analytical 
-    # zero-autocorrelation time of pi/2 for a sinusoid.
-#    delay = int((np.pi/2)/(t[1] - t[0]))
     X = tde.tde(x, delay=delay)
 
-    # code demands data in X arranged as columns.
-    # note: code updated to give this as the output of tde.tde().
-#    X = X.T
+    norms = online_mset(X, output_norms=True, thresh=thresh, verbosity=verbosity)
 
-    norms = online_mset(X, output_norms=True, thresh=thresh, verbosity=1)
-
+    #############################
+    #
     # visualize
+    # 
     fig,ax = pyplot.subplots(3,1, 
                         figsize=(12,5), 
                         gridspec_kw={'height_ratios':[3,1,1]}, 
@@ -325,18 +323,19 @@ def visualize_mset(x,thresh,delay):
     t_d = t[2*delay:]
 
     ax[0].plot(t,x)
-    ax[1].scatter(t_d,norms, s=5)
+    ax[1].scatter(t_d,norms, s=2)
 
-    ymin = 10**int(np.floor(min(np.log10(norms[norms!=0.]))))
-    ymin = max(10**-5,ymin)
-    ymax = 10**int(np.ceil(max(np.log10(norms[norms!=0.]))))
+#    ymin = 10**int(np.floor(min(np.log10(norms[norms!=0.]))))
+#    ymin = max(10**-5,ymin)
+#    ymax = 10**int(np.ceil(max(np.log10(norms[norms!=0.]))))
 
-    ax[1].set_yscale('log')
+#    ax[1].set_yscale('log')
+    ymin,ymax = 0,0.2
     ax[1].set_ylim([ymin,ymax])
+    
     yticks = [ymin,thresh,ymax]
     ax[1].set_yticks( yticks )
-    ax[1].set_yticklabels([r'$10^{%i}$'%np.log10(val) for val in yticks])
-    
+#    ax[1].set_yticklabels([r'$10^{%i}$'%np.log10(val) for val in yticks])
     
     ax[1].yaxis.grid()
     gls = ax[1].get_ygridlines()
